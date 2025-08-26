@@ -1,0 +1,22 @@
+1. 데이터 전처리
+표준화(Standardization)
+Z-Score
+들쭉날쭉한 데이터셋 값들을 평균 0, 표준편차 1로 스케일을 맞춤
+보통 열벡터(feature)를 기준으로 맞춘다.
+
+정규화(Normalization)
+Min-Max Scaling
+각 열벡터들의 값들을 0~1 사이로 스케일링한다.
+L1 Normalization
+각 행벡터(샘플별)들의 합(맨해튼 거리)을 1로 맞추는 작업
+L2 Normalization
+각 행벡터(샘플별)들의 길이(유클리드 거리)를 1로 맞추는 작업
+
+2. 가중치 정규화(Regularization)
+모델의 안정성, 과적합 방지를 위해 가중치를 조정한다.
+L1 정규화(Lasso)
+각 열벡터를
+L2 정규화(Lidge)
+Dropout
+Weight Decay
+
