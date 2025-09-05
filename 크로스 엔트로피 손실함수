@@ -16,4 +16,4 @@ Entropy와 Cross Entropy Loss
 각 정보가 나올 확률을 기반으로 최소 평균 정보량을 표현한 것이 Entropy
   • H(P) = -(P(n) * log2P(n)의 총합)
 즉, 크로스 엔트로피는 Information Gain이 다를 때(예측 확률 분포)를 계산하는 식이다.
-  • log2P(n)만  log2Q(n)로 바뀜, H(P) + KL divergence
+  • log2P(n)만 log2Q(n)로 바뀜, H(P) + KL divergence
