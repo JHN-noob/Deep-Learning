@@ -1,3 +1,4 @@
 BCE Loss Function
 
 이진 분류 문제에서는 BCE 손실함수를 주로 사용한다.
+  ♠H(P, Q) = -(P(n) * logQ(n)의 총합)
