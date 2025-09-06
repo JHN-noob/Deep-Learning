@@ -1,1 +1,103 @@
+import torch
+import torch.nn as nn
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score
 
+
+df_data = pd.read_csv('dataset_phishing/dataset_phishing.csv')
+
+df_data['target'] = pd.get_dummies(df_data['status'])['legitimate'].astype('int')
+df_data.drop('status', axis = 1, inplace = True)
+df_data[['url', 'target']].head(5)
+# status feature에서 'legitimate'이면 1, 아니면 0을 저장함
+
+X = df_data.iloc[:, 1:-1]
+y = df_data['target']
+# 첫번째 feature인 'url'은 문자열이라 불필요
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, stratify=y)
+# test_set을 20%로 나눠주고 y를 기준으로 적절한 비율의 라벨로 테스트셋이 분류됨(데이터 편향 방지)
+
+std_scaler = StandardScaler()
+std_scaler.fit(X_train)
+X_train_tensor = torch.from_numpy(std_scaler.transform(X_train)).float()
+X_test_tensor = torch.from_numpy(std_scaler.transform(X_test)).float()
+y_train_tensor = torch.from_numpy(y_train.values).float()
+# series 형식인 y_train을 ndarray 형식으로 바꿔줌
+y_train_tensor = y_train_tensor.unsqueeze(1)
+# (2286, )인 열벡터를 (2286, 1)의 행렬로 변환(output_dim이 1이므로)
+y_test_tensor = torch.from_numpy(y_test.values).float()
+y_test_tensor = y_test_tensor.unsqueeze(1)
+
+class FunModel(nn.Module):
+    def __init__(self, input_dim, output_dim):
+        super().__init__()
+
+        self.linear_layers = nn.Sequential(
+            nn.Linear(input_dim, 200),
+            nn.LeakyReLU(0.1),
+            nn.Linear(200, 100),
+            nn.LeakyReLU(0.1),
+            nn.Linear(100, 20),
+            nn.LeakyReLU(0.1),
+            nn.Linear(20, 5),
+            nn.LeakyReLU(0.1),
+            nn.Linear(5, output_dim),
+            nn.Sigmoid()
+            # 회귀모델과 기본 뼈대는 같지만 마지막에 sigmoid 함수를 추가한다.
+        )
+
+    def forward(self, x):
+        y = self.linear_layers(x)
+        return y
+
+input_dim = X_train_tensor.size(-1)
+output_dim = y_train_tensor.size(-1)
+model = FunModel(input_dim, output_dim)
+loss_func = nn.BCELoss()
+optimizer = torch.optim.Adam(model.parameters())
+
+nb_epochs = 100
+minibatch_size = 256
+
+for index in range(nb_epochs):
+    indices = torch.randperm(X_train_tensor.size(0))
+
+    x_batch_list = torch.index_select(X_train_tensor, 0, index=indices)
+    y_batch_list = torch.index_select(y_train_tensor, 0, index=indices)
+    x_batch_list = x_batch_list.split(minibatch_size, 0)
+    y_batch_list = y_batch_list.split(minibatch_size, 0)
+
+    epoch_loss = list()
+    for x_minibatch, y_minibatch in zip(x_batch_list, y_batch_list):
+        y_minibatch_pred = model(x_minibatch)
+
+        loss = loss_func(y_minibatch_pred, y_minibatch)
+        epoch_loss.append(loss)
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+    if (index % 100) == 0:
+        print(index, sum(epoch_loss) / len(epoch_loss))
+
+y_pred_list = list()
+x_test_batch_list = X_test_tensor.split(minibatch_size, 0)
+model.eval()
+with torch.no_grad():
+    for x_minibatch in x_test_batch_list:
+        y_test_pred_sigmoid = model(x_minibatch)
+        y_test_pred = torch.round(y_test_pred_sigmoid)
+        y_pred_list.extend(y_test_pred.squeeze().detach().tolist())
+
+y_pred_list = torch.tensor(y_pred_list).unsqueeze(1)
+
+print("Confusion_matrix\n", str(confusion_matrix(y_test_tensor, y_pred_list)))
+print("Precision\n", str(precision_score(y_test_tensor, y_pred_list)))
+print("Recall\n", str(recall_score(y_test_tensor, y_pred_list)))
+print("F1 Score\n", str(f1_score(y_test_tensor, y_pred_list)))
+# Precision(정확도)이 97.05%이다.
