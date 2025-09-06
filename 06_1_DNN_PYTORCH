@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 x = torch.ones(5000, 10)
 y = torch.zeros(5000, 1)
 learning_rate = 0.01
