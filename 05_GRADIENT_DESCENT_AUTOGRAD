@@ -9,6 +9,7 @@ pyo.init_notebook_mode()
 from sklearn.datasets import load_diabetes
 diabetes_data = load_diabetes()
 
+
 # 데이터 세트에 대한 설명(당뇨병 데이터)
 # print(diabetes_data.DESCR)
 
