@@ -29,4 +29,4 @@ Early Stopping
 일정 회차가 지나면 Validation Set에 대한 성능은 낮아지고 Training Set에 대한 성능은 높아지는 구간이 존재할 수 있음(Overfitting)
 따라서 더이상 Validation Set에 대한 성능이 좋아지지 않으면 학습을 미리 종료하는 기법을 Early Stopping이라고 한다.
 단, 어느 회차의 Epoch까지 기다릴 것인지에 대한 값을 설정해야 하므로 별도의 하이퍼 파라미터가 필요함
-  • Early Stopping을 해도 종료한 이후에 다음 회차 성능이 더 안좋을것이라는 것에 대해 보장할 수 없음
+  • Early Stopping을 해도 종료한 이후의 성능이 더 안좋을것이라는 것에 대해 보장할 수 없음
