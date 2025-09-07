@@ -1,0 +1,31 @@
+Evaluation(평가)
+
+
+Bias와 Variance
+
+학습 데이터에 대한 예측 정확도가 높아도 테스트 데이터의 정확도가 낮을 수 있음(Overfitting)
+Bias가 높다면, 학습 데이터에서도 예측 정확도가 떨어지는 경우를 의미함(Underfitting)
+Variance가 크다면, 새로운 테스트 데이터에 대한 예측 정확도가 많이 차이가 나는것을 의미함
+  • 즉, Variance가 높고 Bias가 낮은 경우는 Overfitting
+  • Variance가 낮고 Bias가 높은 경우는 Underfitting
+
+Bias가 높을 경우에는 Underfitting일 가능성이 높으므로 모델의 Capacity를 향상(레이어와 뉴런의 수를 늘림)시킬 필요가 있다.
+  • Model Capacity : 뉴런의 수와 뉴런이 서로 어떻게 연결되어 있는지 결정
+Variance가 높을 경우에는 가장 좋은 방법은 데이터수를 늘리는것이지만 어렵다면 Regularization 기법을 적용한다.
+
+
+Validation Set
+
+딥러닝에서는 보통 데이터셋을 Training, Validation, Test로 나눈다.
+Validation Set은 한번의 에포크마다 학습이 잘되었는지 검증하는 데이터셋이다.
+일반적인 비율은 6:2:2로 나눈다.
+반복된 Validation은 전체 에포크가 끝날때 가장 성능이 좋은 모델의 가중치를 불러온다.
+  • 머신러닝에서는 Validation Set을 나눌만큼 데이터셋이 크지 않다면 Cross-Validation 기법을 사용함
+
+
+Early Stopping
+
+학습 회차(Epoch)별로 Training Set과 Validation Set의 성능을 측정한다.
+일정 회차가 지나면 Validation Set에 대한 성능은 낮아지고 Training Set에 대한 성능은 높아지는 구간이 존재할 수 있음(Overfitting)
+따라서 더이상 Validation Set에 대한 성능이 좋아지지 않으면 학습을 미리 종료하는 기법을 Early Stopping이라고 한다.
+단, 어느 회차의 Epoch까지 기다릴 것인지에 대한 값을 설정해야 하므로 별도의 하이퍼 파라미터가 필요함
