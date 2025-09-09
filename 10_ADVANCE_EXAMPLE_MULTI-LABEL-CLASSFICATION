@@ -157,3 +157,19 @@ early_stop = 5
 model, lowest_loss, train_losses, valid_losses = train_model(model, early_stop, nb_epochs, progress_interval)
 
 valid_losses
+
+# 테스트셋 기반 Evaluation
+# 참고: 텐서 비교
+
+# element-wise란?
+print(torch.ne(torch.tensor([[1, 3], [2, 5]]), torch.tensor([[1, 2], [2, 3]])))
+print(torch.equal(torch.tensor([[1, 3], [2, 5]]), torch.tensor([[1, 2], [2, 3]])))
+
+x_minibatch, y_minibatch = next(iter(test_batchs))
+y_test_pred = model(x_minibatch.view(x_minibatch.size(0), -1))
+pred = torch.argmax(y_test_pred, dim=1)
+print(y_test_pred.shape, y_minibatch.shape, pred.shape)
+correct = pred.eq(y_minibatch).sum()
+print(pred.eq(y_minibatch).sum(), pred.eq(y_minibatch).sum().item())
+
+# 참고: 텐서객체.nonzero()
