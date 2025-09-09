@@ -160,7 +160,6 @@ valid_losses
 
 # 테스트셋 기반 Evaluation
 # 참고: 텐서 비교
-
 # element-wise란?
 print(torch.ne(torch.tensor([[1, 3], [2, 5]]), torch.tensor([[1, 2], [2, 3]])))
 print(torch.equal(torch.tensor([[1, 3], [2, 5]]), torch.tensor([[1, 2], [2, 3]])))
@@ -173,3 +172,56 @@ correct = pred.eq(y_minibatch).sum()
 print(pred.eq(y_minibatch).sum(), pred.eq(y_minibatch).sum().item())
 
 # 참고: 텐서객체.nonzero()
+torch.tensor([[0.6, 0.0, 0.0, 0.0],
+              [0.0, 0.4, 1.0, 0.0],
+              [0.0, 0.0, 1.2, 0.0],
+              [0.0, 0.0, 0.0, -0.4]]).nonzero()
+
+# 참고: 슬라이싱
+data = torch.FloatTensor([[1, 2], [3, 4]])
+print(data.shape, data[:, 0])
+
+# len(test_batchs.dataset) : 전체 데이터셋 길이
+len(test_batchs.dataset)
+
+# 비교 코드
+# 테스트셋에서 틀린 예측이 있는 인덱스를 리스트로 만드는 과정
+print(pred.ne(y_minibatch).shape, pred.ne(y_minibatch), pred.ne(y_minibatch).nonzero(), pred.ne(y_minibatch).nonzero()[:, 0], pred.ne(y_minibatch).nonzero()[:, 0].numpy().tolist())
+
+wrong_idx = pred.ne(y_minibatch).nonzero()[:, 0].numpy().tolist()
+for index in wrong_idx:
+    print(index)
+
+# 최종 코드
+test_loss = 0
+correct = 0
+wrong_samples, wrong_preds, actual_preds = list(), list(), list()
+
+model.eval()
+with torch.no_grad():
+    for x_minibatch, y_minibatch in test_batchs:
+        y_test_pred = model(x_minibatch.view(x_minibatch.size(0), -1))
+        test_loss += loss_func(y_test_pred, y_minibatch)
+        pred = torch.argmax(y_test_pred, dim=1)
+        correct += pred.eq(y_minibatch).sum().item()
+
+        wrong_idx = pred.ne(y_minibatch).nonzero()[:, 0].numpy().tolist()
+        for index in wrong_idx:
+            wrong_samples.append(x_minibatch[index])
+            wrong_preds.append(pred[index])
+            actual_preds.append(y_minibatch[index])
+
+test_loss /= len(test_batchs.dataset)
+print('Average Test Loss: {:.4f}'.format(test_loss))
+print('Accuracy: {}/{} ({:.2f}%)'.format(correct, len(test_batchs.dataset), 100*correct/len(test_batchs.dataset)))
+
+# incorrect data만 확인해보기
+plt.figure(figsize=(18, 20))
+
+for index in range(100):
+    plt.subplot(10, 10, index+1)
+    plt.axis('off')
+    plt.imshow(wrong_samples[index].numpy().reshape(28, 28), cmap='gray')
+    plt.title("Pred" + str(wrong_preds[index].item()) + "(" + str(actual_preds[index].item()) + ")", color='red')
+    
+plt.show()
