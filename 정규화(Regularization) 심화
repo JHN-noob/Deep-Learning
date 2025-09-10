@@ -1,8 +1,27 @@
 정규화(Regularization)
 
 모델의 과적합(Overfitting)을 줄이기 위해 사용한다.
+L1과 L2라는 정규화 기법을 통해 w(가중치)값이 과도하게 변하는 것을 막는다.
+  • L1 Loss : 모든 (y - y_pred)의 합의 절댓값
+  • L2 Loss : 모든 (y - y_pred)의 제곱의 절댓값
+
+L1 Regularization(Lasso)
+  • 수식 : 모든 (y - y_pred)의 합의 절댓값 + λ*사용된 가중치들의 합의 절댓값
+λ(람다)값이 작을수록 Regularization의 정도가 약해진다.
+
+L2 Regularization(Ridge)
+  • 수식 : 모든 (y - y_pred)의 합의 절댓값 + λ*사용된 가중치들의 제곱의 절댓값
+일반적으로는 L2 Regularization을 많이 사용한다.
+
+위의 내용은 머신러닝을 기반으로 한 내용이지만 딥러닝에도 L1/L2 정규화 기법을 사용한다.
+이를 딥러닝에서는 Weight Decay라 부르며 옵티마이저 함수에 값을 넣어줄 수 있다.
+  • torch.optim.Adam() : weight_dacay(float, optional) - weight decay(L2 penalty)(default : 0)
+다만 실제로만 작은값(0.05)의 Weight Decay를 넣어줘도 모델에 영향이 크고 성능이 떨어지므로 거의 사용하지 않는다.
 
 
 참고: Norm
 
 Norm이란 벡터(크기와 방향)의 크기를 계산하는데 사용하는 방법이다.
+  • L1 Norm : x(1, 2)와 y(3, 4)의 벡터가 있다면 (1-3)+(2-4)의 절댓값을 표현한 것
+  • L2 Norm : x(1, 2)와 y(3, 4)의 벡터가 있다면 (-2)^^2+(-2)^^2에 루트를 씌운 것
+    * L2 Norm은 2차원 그래프에서 두 점간의 거리를 계산하는 일반적인 공식과 동일하다.
