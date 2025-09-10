@@ -33,3 +33,37 @@ Norm이란 벡터(크기와 방향)의 크기를 계산하는데 사용하는 �
 
 Dropout
 
+가장 효과가 좋은 기법 중 하나로 0~1의 확률로 뉴런을 제거하는 기법이다.
+예를들어 Dropout 값이 0.5라면 전체 뉴런 중 50%가 제거된 상태로 학습이 진행된다.
+하나의 Dropout이 적용된 전결합계층을 Realization 또는 Instance라고 부른다.
+매번 미니배치 입력이 들어올때마다, 랜덤하게 일부 뉴런을 Dropout 확률에 기반하여 제거하고 참여한 뉴런에 대해서만 가중치 업데이트
+이를 통해 약간씩 다른 신경망 모델이 학습되게 되고, 이는 앙상블 기법과 유사함
+  • Dropout 장점 : Regularization을 통한 Overfitiing 이슈 완화
+  • Dropout 단점 : 학습속도가 저하될 수 있고, 하이퍼 파라미터가 추가로 필요함
+    * 앙상블 기법의 대표기술인 머신러닝의 Random Forest는 어떤 데이터든 중간 또는 그이상의 예측성능을 보여준다.
+
+Dropout의 학습 및 예측
+일반적으로 Dropout은 학습할때만 적용하고 예측할때는 모든 뉴런을 다 켠 상태로 수행한다.
+이렇게 되면 예측할때 더 큰 입력(1/p)을 받는 상황이 되는데, 이를 상쇄하기 위해 예측시에는 w(가중치)에 p(Dropout 확률)를 곱해서 예측을 진행한다.
+
+
+Batch Normalization(BN, 배치 정규화)
+
+Weight Decay, Dropout은 학습속도가 저하되는 이슈와 Internal Covariate Shift 이슈가 있다.
+
+Internal Covariate Shift 이슈
+Covariate Shift : 머신러닝에서 학습데이터와 테스트데이터의 데이터 분포의 변화(다름)를 의미
+  • Covariate Shift로 인해 학습데이터로 잘 학습된 모델이 데스트데이터에서 성능이 낮아질 수 있다.
+Internal Covariate Shift : 각 레이어나 Activation마다 입력 값의 분산이 달라지는 현상
+
+Batch Normalization 적용
+따라서 위의 이슈를 해결하기 위해 이전 레이어에서의 활성화값/출력값에 대해서 Standardization(정규분포의 표준화)로 평균이 0, 분산이 1이 되도록 해당값들을 정규화(Normalization)하는것이 Batch Normalization이다.
+그리고 추가로 여기에 Scale과 Shift 작업을 해준다.
+  • 수식 : (γ*표준화한 값 )+ β
+    * Scale : γ배 데이터값을 늘려줌
+    * Shift : β 값만큼 평균을 이동함
+γ와 β는 학습 파라미터로 오차역전파를 통해서 파라미터가 업데이트됨
+각 레이어에 Activation 함수 전이나 이후에 BN을 넣어줘도 된다.
+  • BN 장점 : Dropout과는 달리 하이퍼 파라미터 불필요, 학습속도가 저하되지 않으면서 높은 성능이 나옴
+
+결과적으로, 딥러닝에서는 Regularization 기법으로 Batch Normalization을 가장 많이 사용한다.
