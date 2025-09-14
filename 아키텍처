@@ -1,3 +1,38 @@
 아키텍처(Architecture)
 
 
+딥러닝 설계 단계
+  • 문제 확인
+    • 연속성이 있는 실수형 숫자 값을 예측하는 문제: Regression
+    • 범주형 값을 예측하는 문제
+      • 이산값이면 Binary Classfication
+      • 클래스가 3개 이상이면 Multiclass Classfication
+
+  • 네트워크 구성
+    • input, output 확인
+    • 적절한 hidden layer 구성
+
+  • 활성화함수, 손실함수 선택
+    • Regression: 일반적으로 활성화함수는 nn.LeakyReLU(), 손실함수로 nn.MSELoss() 사용
+    • Binary Classfication
+      • 일반적으로 활성화함수로 nn.LeakyReLU(), 손실함수로 nn.BCELoss() 사용
+      • 일반적으로 nn.BCELoss() 사용을 위해 Layer 마지막에는 nn.Sigmoid() 사용
+    • Multiclass Classfication
+      • 일반적으로 활성화함수로 nn.LeakyReLU(), 손실함수로 nn.NLLLoss() 사용
+      • 일반적으로 nn.NLLLoss() 사용과 Multiclass 출력을 위해 Layer 마지막에는 nn.LogSoftmax(dim=-1) 사용 = nn.CrossEntropyLoss()
+
+  • Optimizer 선택
+    • 일반적으로 Adam Optimizer 선택: torch.optim.Adam(model.parameters())
+
+  • Regularization 기법 선택
+    • 일반적으로 Batch Normalization 또는 Dropout 선택
+
+  • Evaluation 기법 선택
+    • 일반적으로 Training Set, Validation Set, Test Set을 6:2:2로 나누고,
+    • 매 epoch마다 Training Set으로 학습하고 Validation Set으로 Evaluation을 진행함
+    • Mini-Batch와 Early Stopping을 적용함
+    ※ 먼저 가장 기본이 되는 모델을 구축하고 저장한 후 이를 기반으로 성능 개선 테스트를 통해 모델 성능을 개선하는 방식으로 진행함. 즉, 기본 버전을 만들고 다양한 테스트를 통해 명확히 성능이 개선된 모델이 나올 경우 다른 버전으로 별도로 모델을 저장하는 방식으로 진행함
+
+  • 성능 개선
+    • underfitting으로 의심되는 경우, network capacity(뉴런 및 레이어 수)를 늘리고,
+    • overfitting으로 의심되는 경우, regularization 기법을 추가함(예: dropout 추가)
