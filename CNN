@@ -32,3 +32,27 @@ Stride
   • 출력너비, 높이 수식
     • ((너비 + 2*패딩 - 필터 너비) / 스트라이드) + 1
     • ((높이 + 2*패딩 - 필터 높이) / 스트라이드) + 1
+
+Convolution Layer는 입력 데이터에 필터를 적용 후 활성화함수를 적용한다.
+하나의 이미지에 여러 Convolution Layer를 통과시켜 다양한 Feature Map을 추출함
+
+
+Pooling Layer
+  • Convolution Layer에서 얻어진 출력값에서 특징을 뽑아내는 과정
+  • Pooling은 각 Feature Map의 사이즈를 줄이며, 특징을 뽑아냄
+Max Pooling과 Average Pooling
+  • Pooling의 대표적인 기법
+  • Pooling 사이즈는 입력 데이터의 배수여야하며, 정사각형 사이즈여야함
+  • Pooling 사이즈가 2x2면 2x2마다 가장 큰 값을 취하는것을 Max Pooling, 2x2마다의 평균값을 취하는것을 Average Pooling이라고 함
+  • 결과값 수식
+    • 입력 너비 / 풀링 사이즈 너비
+    • 입력 높이 / 풀링 사이즈 높이
+
+
+Flatten(Vectorization)
+  • CNN 네트워크의 마지막에는 클래스 분류를 위해 Fully Connected Layer에 전달함
+  • 이를 위해 1차원 텐서로 만들어줘야하는데 이를 Flatten이라고 함
+  • 지금까지의 계산을 통해 각 데이터는 특징 데이터가 되므로 1차원 데이터로 만들어줘도 됨
+
+Fully-Connected Layers(Dense Layer)
+  • 마지막으로 하나 이상의 FC Layer에 적용시켜주고 클래스 분류를 위해 LogSoftmax등의 활성화함수를 적용해준다.
