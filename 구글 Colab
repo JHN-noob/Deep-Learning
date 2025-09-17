@@ -2,3 +2,43 @@ Google Colab
 
 
 GPU 기반 서버 환경 구축
+  • GPU 이슈
+    • GPU는 NVIDIA와 AMD(Radeon) 두 종류가 가장 널리 사용됨
+    • GPU 지원을 위해 NVIDIA는 CUDA, Radeon은 ROCm라는 별도 소프트웨어가 필요
+  • 개인이 고려할 수 있는 옵션들
+    • AWS Free Tier
+    • GCP(Google Cloud Platform)
+    • Google Colab
+
+Google Colab 사용
+  • 사용법은 Jupyter Notebook과 동일하다.
+    • 온라인 환경이므로 인터페이스에 딜레이가 있을 수 있음
+
+PyTorch와 Google Colab
+  • Google Colab에서 새로운 노트북 파일 생성
+  • 런타임 → 런타임 유형 변경에서 GPU로 설정 후 다음 테스트 코드 실행
+    * import torch # PyTorch 라이브러리 설치 확인
+      torch.__version__ # PyTorch 버전 확인
+      torch.couda.is_available() # PyTorch에서 GPU 사용 가능 여부 확인
+      data = torch.rand(3, 3) # PyTorch 동작 확인
+      print(data)
+  • 작업은 개인 PC로, GPU가 필요할때만 Google Colab에 최종 코드만 돌리는것을 추천함
+  • 최대한 동일한 결과값 만드는 방법
+    • 랜덤값(Seed) generation에 따라 결과가 매번 조금씩 다를 수 있으므로, 다음 코드를 통해 랜덤값 generation을 최대한 고정함
+      * device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        torch.manual_seed(1)
+        if device == 'cuda':
+          torch.cuda.manual_seed_all(1) # Multi-GPU의 경우 모든 GPU의 seed값 고정
+        print(device)
+  • GPU로 계산하기
+    • 모델을 GPU에 넣기
+      * model = CNNModel().to(device)
+  • 계산할 텐서를 GPU에 넣기
+    * x_minibatch = x_minibatch.to(device)
+      y_minibatch = y_minibatch.to(device)
+  • 결과 텐서를 CPU로 다시 가져오기
+    * wrong_idx = pred.ne(y_minibatch).nonzero()[:, 0].cpu().numpy().tolist()
+      for index in wrong_idx:
+        wrong_samples.append(x_minibatch[index].cpu())
+        wrong_preds.append(pred[index].cpu())
+        actual_preds.append(y_minibatch[index].cpu())
