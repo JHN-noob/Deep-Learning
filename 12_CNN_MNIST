@@ -1,0 +1,147 @@
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader, Subset
+from torchvision import datasets, transforms
+from sklearn.model_selection import train_test_split
+import numpy as np
+from copy import deepcopy
+
+
+# CNN 모델 구성
+1. 다음 세트로 하나의 Convolution Layer + Pooling Layer를 구성하고 여러 세트로 구축
+    - 보통 Convolution Layer + Pooling Layer의 출력 채널을 늘리는 방식으로 여러 세트 구축
+2. Flatten
+    - 텐서.view(텐서.size(0), -1)로 Flatten
+3. 여러 Fully-Connected Layer 구성
+    - Flatten한 입력을 받아서 최종 Multi-Class 개수만큼 출력
+    - Multi-Class일 경우, nn.LogSoftmax()로 최종 결과값 출력
+class CNNModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        self.conv_layers = nn.Sequential(
+            nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1),
+            nn.LeakyReLU(0.1),
+            nn.BatchNorm2d(32),
+            nn.MaxPool2d(2),
+            # 출력 = (N, 32, 14, 14)
+            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
+            nn.LeakyReLU(0.1),
+            nn.BatchNorm2d(64),
+            nn.MaxPool2d(2),
+            # 출력 = (N, 64, 7, 7)
+            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
+            nn.LeakyReLU(0.1),
+            nn.BatchNorm2d(128),
+            nn.MaxPool2d(2)
+            # 출력 = (N, 128, 3, 3)
+        )
+
+        self.linear_layers = nn.Sequential(
+            nn.Linear(128*3*3, 128),
+            nn.LeakyReLU(0.1),
+            nn.BatchNorm1d(128),
+            nn.Linear(128, 64),
+            nn.LeakyReLU(0.1),
+            nn.BatchNorm1d(64),
+            nn.Linear(64, 10),
+            nn.LogSoftmax(dim=-1)
+        )
+
+    def forward(self, x):
+        x = self.conv_layers(x)
+        x = x.view(x.size(0), -1)
+        x = self.linear_layers(x)
+        return x
+
+# MNIST with CNN
+train_rawdata = datasets.MNIST(root = 'dataset_MNIST',
+                               train = True, # True면 Train 데이터
+                               download = True, # 데이터가 없으면 Download
+                               transform = transforms.ToTensor()) # raw 포맷을 텐서로 바꿔줌
+test_rawdata = datasets.MNIST(root = 'dataset_MNIST',
+                               train = False, # False면 Test 데이터
+                               download = True, # 데이터가 없으면 Download
+                               transform = transforms.ToTensor()) # raw 포맷을 텐서로 바꿔줌
+print('number of training data : ', len(train_rawdata))
+print('number of test data : ', len(test_rawdata))
+
+VALIDATION_RATE = 0.2
+train_indices, val_indices, _, _ = train_test_split(
+    range(len(train_rawdata)), # Train 데이터셋의 인덱스 번호 추출(0~59999)
+    train_rawdata.targets, # y 정답 라벨
+    stratify = train_rawdata.targets, # y 정답 라벨 균등분포
+    test_size = VALIDATION_RATE # 여기선 Validation 데이터셋 비율
+)
+
+train_dataset = Subset(train_rawdata, train_indices)
+validation_dataset = Subset(train_rawdata, val_indices)
+
+print(len(train_dataset), len(validation_dataset), len(test_rawdata))
+
+BATCH_SIZE = 128
+train_batchs = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+va_batchs = DataLoader(validation_dataset, batch_size=BATCH_SIZE, shuffle=True)
+test_batchs = DataLoader(test_rawdata, batch_size=BATCH_SIZE, shuffle=False)
+
+# CNNModel 객체 생성
+model = CNNModel()
+model
+
+# loss, optimizer 설정
+loss_func = nn.NLLLoss()
+optimizer = torch.optim.Adam(model.parameters())
+
+# Training & Validation
+def train_model(model, early_stop, nb_epochs, progress_interval):
+    train_losses, valid_losses, lowest_loss = list(), list(), np.inf
+
+    for epoch in range(nb_epochs):
+        train_loss, valid_loss = 0, 0
+
+        # train model
+        model.train() # prepare model for training
+        for x_minibatch, y_minibatch in train_batchs:
+            y_minibatch_pred = model(x_minibatch)
+            loss = loss_func(y_minibatch_pred, y_minibatch)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            train_loss += loss.item()
+
+        train_loss = train_loss / len(train_batchs)
+        train_losses.append(train_loss)
+
+        # validate model
+        model.eval()
+        with torch.no_grad():
+            for x_minibatch, y_minibatch in va_batchs:
+                y_minibatch_pred = model(x_minibatch)
+                loss = loss_func(y_minibatch_pred, y_minibatch)
+                valid_loss += loss.item()
+    
+        valid_loss = valid_loss / len(va_batchs)
+        valid_losses.append(valid_loss)
+    
+        if valid_losses[-1] < lowest_loss:
+            lowest_loss = valid_losses[-1]
+            lowest_epoch = epoch
+            best_model = deepcopy(model.state_dict())
+        else:
+            if (early_stop > 0) and lowest_epoch + early_stop < epoch:
+                print("Early Stopped", epoch, "epochs")
+                break
+    
+        if (epoch % progress_interval) == 0:
+            print(train_losses[-1], valid_losses[-1], lowest_loss, lowest_epoch, epoch)
+
+    model.load_state_dict(best_model)
+    return model, lowest_loss, train_losses, valid_losses
+
+# 훈련 실행
+nb_epochs = 30
+progress_interval = 3
+early_stop = 10
+
+model, lowest_loss, train_losses, valid_losses = train_model(model, early_stop, nb_epochs, progress_interval)
