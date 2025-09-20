@@ -87,3 +87,22 @@ Output Gate
 h_t-1과 x_t를 시그모이드 함수로 계산하여 어떤 값을 hidden state로 전달하고, 또 output으로 내보낼지 결정한다.
   • 수식 : o_t = Sigmoid(w_o[h_t-1, x_t] + b_o)
   • h_t = o_t ⓧ tanh(C_t)
+
+
+이외의 Approach: GRU(Gated Recurrent Unit)
+LSTM과 같이 RNN 이슈를 해결하기위해 고안
+GRU는 LSTM과 달리 Reset Gate와 Update Gate로 구성되며 Output Gate가 존재하지않음
+  • Reset Gate는 이전 상태를 얼마나 반영할지 결정
+  • Update Gate는 이전 상태와 현재 상태를 얼마만큼의 비율로 반영할지 결정
+GRU가 계산량이 적다고 알려져있지만, 최근 연구에서는 LSTM이 보다 많이 사용됨
+
+
+Bidirectional RNN
+RNN은 시계열 데이터에 많이 사용됨
+  • 이때 목표는 '지금까지 주어진것을 보고 다음것을 예측'하는것
+하지만 RNN 계열 모델은 언어처리 분야에서도 많이 사용됨
+  • 이때는 문장 앞부분뿐만 아니라, 문장 뒷부분의 데이터도 문장 가운데를 결정하는데 필요함
+이를 반영하기위해 고안한 모델이 Bidirectional RNN
+Bidirectional RNN은 RNN이 두개 쌓여있는 구조로,
+  • 첫번째 RNN은 forward mode로 h_1 → h_t 방향으로 계산되고,
+  • 두번째 RNN은 backward mode로 h_t ← h_1 방향으로 계산됨
