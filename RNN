@@ -1,4 +1,4 @@
 RNN(Recurrent Neural Network)
 
 
-순환신경망이라 부르며 시계열 데이터에 적합하다.
+순환신경망이라고 하며, 입력과 출력을 시퀀스 단위로 처리하는 시퀀스(Sequence) 모델
