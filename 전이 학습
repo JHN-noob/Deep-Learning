@@ -2,3 +2,11 @@
 
 
 전이 학습이란 특정 태스트를 학습한 모델을 다른 태스크 수행에 재활용하는 기법
+컴퓨터 비전 분야를 필두로 전이학습 사용 결과, 기존 지도학습 모델보다 개선된 성능을 보였다.
+
+Transfer Learning 학습
+일반적으로 대량의 데이터를 학습한 사전 학습 모델(Pretrained Model or Backbone)을 사용한다.
+Pre-trained Model에서 출력을 뽑아내는 일을 Feature Map을 뽑아낸다고 한다. 또한 해당 Feature들을 Bottleneck Feature라고 부른다.
+
+Transfer Learning의 4가지 분류
+Small dataset and similar to the pre-trained model's dataset
