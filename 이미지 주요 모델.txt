@@ -1,4 +1,4 @@
-key Models for Image
+Key Models for Image
 
 
 Vision Transformer
@@ -32,7 +32,7 @@ Attention 요약
     • 이를 기반으로 디코더 출력값을 계산한다.
     • Attention 동작을 실제 구현하기위해 다양한 수학적 계산식이 제안되었다.
 
-참고: Attention Score 계산 예
+참고 : Attention Score 계산 예
   • Attention Score 계산
     • score(s_t, h_i) = s_t(전치) * h_i
       • t(time step)의 디코더 hidden state)를 s_t라고 정의
@@ -45,3 +45,6 @@ Attention 요약
   • 각 어텐션 가중치와 hidden state 값을 곱하여 어텐션 값(Attention Value)를 구한다.
     • a_t = α_i(t) * h_i들의 합(i는 N)
     • 바로 이 a_t가 Context Vector가 된다.
+
+
+Transformer 모델이란?
