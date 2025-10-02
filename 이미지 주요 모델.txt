@@ -48,3 +48,91 @@ Attention 요약
 
 
 Transformer 모델이란?
+  • Attention Is All You Need 논문에서 제안되었음
+  • Transformer는 Sequence 2 Sequence 모델과 유사하게 인코더와 디코더로 구성되지만
+  • 내부에는 RNN계열 모델을 사용하지않고, N개(Attention Is All You Need에서는 6개)의 인코더와 디코더로 구성됨
+  • Transformer 모델 구조
+    • 논문상에서는 인코더와 디코더를 각각 6개의 레이어로 구성함
+      • 각 레이어는 2개의 sub-layer로 구성
+
+Positional Encoding
+  • RNN계열 모델은 순서가 있는 입력을 처리할 수 있지만, Transformer는 입력 순서를 알려주기 어려우므로
+  • 입력 정보에 위치 정보를 더해서 입력으로 사용함
+
+Multi-Head Self-Attention과 Add & Norm
+  • Self Attention
+    • 입력 순차 데이터끼리 유사도를 구해서 Attention Score를 구하는 기법
+    • 예를 들어, 입력 순차 데이터가 문장일 경우 문장 내의 단어들끼리 유사도를 계산하므로
+    • 문장 내에서 it과 animal 단어가 연관되어있음을 찾아내어 예측에 반영이 가능하다.
+  • Multi-Head Attention
+    • 논문을 기준으로 예를 들면 512 차원의 단어 벡터를 num_heads 하이퍼 파라미터 값(논문은 8)으로 나누어
+    • 512 / 8 = 64차원의 벡터를 기반으로 각각 Attention을 수행한다.
+    • 문장이 하나가 아니라 여러개로 쪼개면 놓치는 부분없이 다양한 값(각각 가중치 값이 있기 때문)으로 Attention해야할 정보를 수집한다.
+  • Add & Norm
+    • 잔차 연결(Residual Connection)과 레이어 정규화(Layer Normalization)을 의미한다.
+    • 잔차 연결
+      • 잔차 연결은 모델의 학습을 돕는 기법으로 식은 다음과 같다.
+      • Multi-Head Attension sub-layer의 입력값을 x, 출력값을 Multi_head Attention(x)라고 정의한다면
+      • 잔차 연결식(H(x))는 H(x) = x + Multi_head Attention(x)
+        • Transformer의 모든 layer 차수는 512로 동일하므로 덧셈이 가능하다.
+    • 레이어 정규화
+      • 잔차 연결값은 결국 행렬이므로 즉, 각각의 행(샘플 or 토큰 1개)에 대한 열의 분산과 평균을 구하여 정규화값으로 변환한다.
+        • feature들을 정규화해도 되는 이유는 토큰(문장)이라 값의 분포가 다 유사하기 때문이며, BN은 배치(행)들을 묶어서 1개의 feature에 대해 정규화를 한다.
+        • LN = LayerNorm(x + Sublayer(x))
+      • 정규화 시, γ와 β를 추가해서 정규화값을 계산한다.(γ와 β는 오차역전파로 업데이트되는 값)
+        • ln_i = γx_i + β = LyaerNorm(x_i)
+
+Position-wise Feed Forward Neural Network
+  • 기본적인 FC Layer이지만, 입력이 Positional Encoding을 하므로 Position마다 적용되는 FC Layer이다.
+
+디코더의 첫번째 sub-layer의 Masked Multi-Head Attention
+  • 디코더의 첫번째 sub-layer에 적용되는 Attention 기법
+  • RNN계열 모델은 입력 데이터를 순차적으로 입력받으므로 현재까지 입력받은 입력 데이터에 한해서만 예측을 수행한다.
+  • Transformer 모델은 전체 입력 데이터를 한꺼번에 입력받으므로 현재 시점에는 고려하지 않아야할 미래 데이터까지 고려해서 예측을 수행한다.
+  • 따라서 이를 막기위해 현재보다 미래의 데이터는 보지못하도록 마킹을 하고 Self-Attention을 수행한다.
+
+디코더의 두번째 sub-layer의 Encoder-Decoder Multi-Head Attention
+  • 기본 Attention과 같이 디코더의 첫번째 sub-layer의 출력과 인코더의 마지막 layer에서 나온 hidden state간의 Attention을 계산한다.
+
+
+Vision Transformer
+  • Step1 : 이미지를 고정된 patch 사이즈로 자른다.
+  • Step2 : 2차원 행렬 픽셀 데이터를 1차원 데이터로 Flatten한다.
+  • Step3 : Positional Encoding 적용 + CLS(예: 1 x 768 벡터)라는 각 잘려진 이미지를 분류할 수 있는 추가 정보 적용
+  • Step4 :
+    • Transformer Encoder는 Multi-Head self-Attention 수행(잔차 연결(Residual Connection)과 레이어 정규화(Layer Normalization)도 적용)
+    • 이를 MLP 레이어(FC Layer)에 넣어서 출력결과를 얻는다.
+
+
+Resnet
+  • CNN 모델 깊이를 늘리면 늘릴수록 성능이 개선되는가? 에 대한 물음에서 시작
+    • 56개의 레이어의 모델 성능이 20개의 레이어의 모델 성능보다 좋지않았다.
+  • 주요 원인 중 하나로 Gradient Vanishing 현상을 지목함
+  • Residual block을 기존 레이어에 추가하여 문제를 해결하고자 함
+  • 기존 CNN 모델
+    • x : 입력값
+    • F(x) : CNN Layer → ReLU → CNN Layer를 통과한 출력값
+    • H(x) : CNN Layer → ReLU → CNN Layer → ReLU를 통과한 출력값
+    • H(x)가 정답 y에 가까워지도록, 결국 H(x)가 y를 출력하도록 만드는것이 목표
+  • Resnet 모델
+    • H(x)가 y가 아니라, x를 출력하도록 만드는것이 목표
+    • H(x) = F(x) + x
+    • 입력과 출력을 바로 연결하므로 shortcut이라고도 부르고 하나 이상의 레이어를 skip하는 효과가 있어 skip connection이라고도 함
+    • 결국 몇몇 레이어를 건너뛰는 효과가 있어 Gradient Vanishing 문제를 완화한다.
+
+
+EfficientNet
+  • 기존 CNN계열 모델은 크기를 키움으로써 성능을 높이는 방향으로 연구가 많이 이루어졌다.
+  • 모델을 크게 만드는 기법은 다음과 같이 3가지가 주요하다.
+    • 네트워크 깊이를 보다 깊게
+    • 네트워크 너비를 보다 넓게
+    • 입력 이미지의 해상도를 높게
+  • 각 모델은 위 3가지 방법 중 각각의 방법을 하나씩 선택하여 집중하는 경향이 있었다.
+  • EfficientNet은 이 3가지 기법을 효율적으로 병합하여 모델을 확장하는 방법을 제안하였다.
+  • 예시
+    • 모델 크기를 2^^N배 키우고자 한다면,
+    • 네트워크 깊이(network depth)를 α^^N배, 네트워크 너비(network width)를 β^^N배, 이미지 해상도(image size) γ배 늘린다.
+    • 이를 위해 우선, α, β, γ는 작은 모델에 grid search를 실행하여 구한 최적값을 사용한다.
+    • 이후, Φ값을 변화시켜서(예: 0~8), 각각 α^^Φ, β^^Φ, γ^^Φ배로 모델 크기를 크게 만든다.
+      • Φ값 변화를 기반으로 Efficient-B0 ~ Efficient-B8 등과 같이 모델 크기를 키운 Pre-Trained 모델이 있다.
+    • 이를 Compound Scaling이라고 한다.
