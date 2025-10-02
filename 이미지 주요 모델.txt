@@ -92,7 +92,8 @@ Position-wise Feed Forward Neural Network
   • 따라서 이를 막기위해 현재보다 미래의 데이터는 보지못하도록 마킹을 하고 Self-Attention을 수행한다.
 
 디코더의 두번째 sub-layer의 Encoder-Decoder Multi-Head Attention
-  • 기본 Attention과 같이 디코더의 첫번째 sub-layer의 출력과 인코더의 마지막 layer에서 나온 hidden state간의 Attention을 계산한다.
+  • 기본 Attention과 같이 디코더의 첫번째 sub-layer의 출력과 인코더의 마지막 layer에서 나온 hidden state들간의 Attention을 계산한다.
+  • Sequence 2 Sequence에서 순차적으로 입력된 모든 hidden state들을 계산하듯, Transformer도 step별로 디코더의 출력이 입력으로 다시 들어가서 인코더의 hidden state들간의 Attention을 계산한다.
 
 
 Vision Transformer
